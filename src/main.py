@@ -14,7 +14,7 @@ from model.decoder import Decoder
 from model.tcvae import TCVAE
 
 # TODO: Set path to the location of the tensorflow datasets
-os.environ['TFDS_DATA_DIR'] = '/mnt/sdb/home/ml/tensorflow_datasets/'
+os.environ['TFDS_DATA_DIR'] = '/users/wadh6616/VAE_ECG_data/mean_beat/'
 
 
 def main(parameters):

@@ -1,20 +1,22 @@
 train_dataset:
   name:
-  - 'synth:1.0.11'
-  - 'synth:1.0.9'
+  # - 'synth:1.0.11'
+  # - 'synth:1.0.9'
   - zheng
   - ptb
-  - medalcare
-  split: 'train'
+  # - medalcare
+  split: 'train[:80%]'
   shuffle_size: 1024
   batch_size: 1024
 val_dataset:
   name:
-  - medalcare'
-  split: validation'
+  # - medalcare'
+  - zheng
+  - ptb
+  split: 'train[80%:]'
   shuffle_size: 1024
   batch_size: 1024
-save_results_path: ../results/run_5/
+save_results_path: /users/wadh6616/VAE_ECG/results/run_5/
 seed: 42
 epochs: 200
 latent_dimension: 8

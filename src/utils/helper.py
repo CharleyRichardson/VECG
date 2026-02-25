@@ -134,7 +134,7 @@ class Helper:
         size = 0
         data_list = []
         for i, k in enumerate(datasets['name']):
-            temp = tfds.load(k, split=[datasets['split']], shuffle_files=True)
+            temp = tfds.load(k, split=[datasets['split']], shuffle_files=True, data_dir='/data/wadh6616/VAE_ECG_data/mean_beat/')
             data = temp[0].shuffle(datasets['shuffle_size']).batch(datasets['batch_size']).prefetch(tf.data.AUTOTUNE)
             size = size + len(data)
             data_list.append(data)
@@ -142,7 +142,7 @@ class Helper:
 
     @staticmethod
     def load_dataset(dataset):
-        temp = tfds.load(dataset['name'],split=[dataset['split']], shuffle_files=True)
+        temp = tfds.load(dataset['name'],split=[dataset['split']], shuffle_files=True, data_dir='/data/wadh6616/VAE_ECG_data/mean_beat/')
         data = temp[0].shuffle(dataset['shuffle_size']).batch(dataset['batch_size']).prefetch(tf.data.AUTOTUNE)
         return data, len(temp[0])
 

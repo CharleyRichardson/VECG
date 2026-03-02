@@ -13,8 +13,25 @@ from model.encoder import Encoder
 from model.decoder import Decoder
 from model.tcvae import TCVAE
 
-# TODO: Set path to the location of the tensorflow datasets
-os.environ['TFDS_DATA_DIR'] = '/users/wadh6616/VAE_ECG_data/mean_beat/'
+from matplotlib import pyplot as plt
+import pandas as pd
+import sys
+
+# Set path to the location of the tensorflow datasets
+os.environ['TFDS_DATA_DIR'] = '/users/wadh6616/tensorflow_datasets/'
+
+# Limit the number of threads to prevent memory issues on CPU
+os.environ["OMP_NUM_THREADS"] = "2"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "2"
+os.environ["TF_NUM_INTEROP_THREADS"] = "2"
+
+# Define the target directory
+custom_path = r"/users/wadh6616/VAE_ECG/src"
+# Add to sys.path
+if custom_path not in sys.path:
+    sys.path.append(custom_path)
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 def main(parameters):
@@ -64,6 +81,64 @@ def main(parameters):
     vae.save(base_path + 'model_final/')
 
 
+    ######################################################
+    # THOMAS' VISUALISATIONS
+    ######################################################
+        # Load training log
+    log_path = base_path + 'training/training_progress.csv'
+    df = pd.read_csv(log_path)
+
+    # Plot the loss curves
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['epoch'], df['loss'], label='Training Loss')
+    if 'val_loss' in df.columns:
+        plt.plot(df['epoch'], df['val_loss'], label='Validation Loss')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training and Validation Loss')
+    plt.legend()
+    plt.grid(True)
+
+    # Save the figure
+    plot_path = base_path + 'training/loss_curve.png'
+    plt.savefig(plot_path)
+
+    csv_path = base_path
+    save_path = os.path.join(csv_path,'kl_loss')
+    csv_path =os.path.join(csv_path,'training_progress.csv')
+    plt.close()
+    plt.figure(figsize=(12, 8))
+    plt.plot(df['epoch'], df['kl_loss'], label='Total KL Loss')
+    plt.plot(df['epoch'], df['mi'], label='Mutual Information (MI)')
+    plt.plot(df['epoch'], df['tc'], label='Total Correlation (TC)')
+    plt.plot(df['epoch'], df['dw_kl'], label='Dimension-wise KL')
+    plt.plot(df['epoch'], df['recon'], label='Reconstruction Loss')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss Component Value')
+    plt.title('KL Divergence Components and Reconstruction Loss over Epochs')
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(save_path)
+
+    print(f"📉 Loss curve saved at: {plot_path}")
+
+    # 🚀 2️⃣ Try Saving the Model Properly
+    model_path = base_path + "model_final.keras"
+
+    
+    try:
+        vae.save(model_path)
+        print(f"\n✅ Model saved successfully at: {model_path}")
+    except Exception as e:
+        print(f"\n❌ Error saving model: {e}")
+
+    ######################################################
+    # END OF THOMAS' VISUALISATIONS
+    ######################################################
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         prog='VECG', description='Representational Learning of ECG using disentangling VAE',
@@ -77,42 +152,29 @@ if __name__ == '__main__':
     parameters = Helper.load_yaml_file(args.path_config)
 
     combinations = [
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.01, 'beta': 0.04, 'gamma': 0.01}},
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.05, 'beta': 0.2, 'gamma': 0.05}},
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.1, 'beta': 0.4, 'gamma': 0.1}},
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.2, 'beta': 0.8, 'gamma': 0.2}},
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.3, 'beta': 1.2, 'gamma': 0.3}},
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.4, 'beta': 1.6, 'gamma': 0.4}},
-        {'latent_dimension': 8,  'coefficients': {'alpha': 0.5, 'beta': 2.0, 'gamma': 0.5}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.01, 'beta': 0.04, 'gamma': 0.01}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.05, 'beta': 0.2, 'gamma': 0.05}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.1, 'beta': 0.4, 'gamma': 0.1}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.2, 'beta': 0.8, 'gamma': 0.2}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.3, 'beta': 1.2, 'gamma': 0.3}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.4, 'beta': 1.6, 'gamma': 0.4}},
-        {'latent_dimension': 12, 'coefficients': {'alpha': 0.5, 'beta': 2.0, 'gamma': 0.5}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.01, 'beta': 0.04, 'gamma': 0.01}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.05, 'beta': 0.2, 'gamma': 0.05}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.1, 'beta': 0.4, 'gamma': 0.1}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.2, 'beta': 0.8, 'gamma': 0.2}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.3, 'beta': 1.2, 'gamma': 0.3}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.4, 'beta': 1.6, 'gamma': 0.4}},
-        {'latent_dimension': 16, 'coefficients': {'alpha': 0.5, 'beta': 2.0, 'gamma': 0.5}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.01, 'beta': 0.04, 'gamma': 0.01}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.05, 'beta': 0.2, 'gamma': 0.05}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.1, 'beta': 0.4, 'gamma': 0.1}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.2, 'beta': 0.8, 'gamma': 0.2}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.3, 'beta': 1.2, 'gamma': 0.3}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.4, 'beta': 1.6, 'gamma': 0.4}},
-        {'latent_dimension': 20, 'coefficients': {'alpha': 0.5, 'beta': 2.0, 'gamma': 0.5}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.01, 'beta': 0.04, 'gamma': 0.01}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.05, 'beta': 0.2, 'gamma': 0.05}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.1, 'beta': 0.4, 'gamma': 0.1}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.2, 'beta': 0.8, 'gamma': 0.2}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.3, 'beta': 1.2, 'gamma': 0.3}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.4, 'beta': 1.6, 'gamma': 0.4}},
-        {'latent_dimension': 24, 'coefficients': {'alpha': 0.5, 'beta': 2.0, 'gamma': 0.5}},
-    ]
+        # Your working baselines
+        {'latent_dimension': 64, 'coefficients': {'alpha': 2.0, 'beta': 1.3, 'gamma': 0.7}},  # worked well
+        {'latent_dimension': 64, 'coefficients': {'alpha': 1.5, 'beta': 0.7, 'gamma': 0.1}}, 
+
+        # Push beta higher — more disentanglement pressure
+        {'latent_dimension': 64, 'coefficients': {'alpha': 2.0, 'beta': 2.0, 'gamma': 0.7}},
+        {'latent_dimension': 64, 'coefficients': {'alpha': 2.0, 'beta': 3.0, 'gamma': 0.7}},
+        {'latent_dimension': 64, 'coefficients': {'alpha': 2.0, 'beta': 4.0, 'gamma': 0.7}},
+
+        # Lower alpha — less MI penalty, more information into z
+        {'latent_dimension': 64, 'coefficients': {'alpha': 1.0, 'beta': 1.3, 'gamma': 0.7}},
+        {'latent_dimension': 64, 'coefficients': {'alpha': 0.5, 'beta': 1.3, 'gamma': 0.7}},
+
+        # Higher gamma — more pressure on each dim to match prior
+        {'latent_dimension': 64, 'coefficients': {'alpha': 2.0, 'beta': 1.3, 'gamma': 1.0}},
+        {'latent_dimension': 64, 'coefficients': {'alpha': 2.0, 'beta': 1.3, 'gamma': 2.0}},
+
+        # All low — close to standard VAE, minimal disentanglement pressure
+        {'latent_dimension': 64, 'coefficients': {'alpha': 1.0, 'beta': 1.0, 'gamma': 0.1}},
+
+        # Balanced — equal weight on all three terms
+        {'latent_dimension': 64, 'coefficients': {'alpha': 1.0, 'beta': 1.0, 'gamma': 1.0}}
+        ]
 
     for k in combinations:
         parameters.update(k)

@@ -1,32 +1,28 @@
 train_dataset:
   name:
-  # - 'synth:1.0.11'
-  # - 'synth:1.0.9'
-  - zheng
-  - ptb
-  # - medalcare
-  split: 'train[:80%]'
+  - 'ukbb_ecg'
+  split: 'train'
   shuffle_size: 1024
-  batch_size: 1024
+  batch_size: 32
 val_dataset:
   name:
-  # - medalcare'
-  - zheng
-  - ptb
-  split: 'train[80%:]'
+  - 'ukbb_ecg'
+  split: 'test'
   shuffle_size: 1024
-  batch_size: 1024
-save_results_path: /users/wadh6616/VAE_ECG/results/run_5/
+  batch_size: 128
+
+
+save_results_path: /users/wadh6616/VAE_ECG/results/overnight_trial2/
 seed: 42
-epochs: 200
+epochs: 400
 latent_dimension: 8
-learning_rate: 0.002
+learning_rate: 0.005
 coefficients:
   alpha: 1.0
   beta: 4.0
   gamma: 1.0
-coefficients_raise: 20
-early_stopping: 50
+coefficients_raise: 80
+early_stopping: 100
 reconstruction:
   period_plot: 20
   index_sample: 5

@@ -20,7 +20,7 @@ class CoefficientScheduler(tf.keras.callbacks.Callback):
 
         #coef_raise = annealing['coefficients_raise']
         #self._alpha_cycle[0:coef_raise] = np.linspace(0, alpha, coef_raise)
-        #self._beta_cycle[0:coef_raise] = np.linspace(0, beta, coef_raise)
+        self._beta_cycle[0:coefficient_raise] = np.linspace(0, beta, coefficient_raise)
         #self._gamma_cycle[0:coef_raise] = np.linspace(0, gamma, coef_raise)
 
 
